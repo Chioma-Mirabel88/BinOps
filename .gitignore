@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Hardhat generated files
+artifacts/
+cache/
+typechain-types/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating system and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.swp
+
+# Local backups and temporary working files
+*.bak
+*.orig
+*.patch
+*.backup
+*.backup-*
+*.pre-*
+*.tmp
+binops-frontend-review.txt
+
+# Supabase schema import copy (already imported)
+binops-supabase-import.sql
+
+# Unused duplicate files at project root
+/CollectionsPage.tsx
+/ManagementPages.tsx
+/PSPOperatorsPage.tsx
+
+# Frontend design and development backups
+/frontend/backups/
+
+# Additional application backups
+*.dashboard-backup
+
+# Superseded initial schema drafts
+/database/migrations/001_initial_schema.sql
+/database/migrations/001_initial_schema.revised.sql
