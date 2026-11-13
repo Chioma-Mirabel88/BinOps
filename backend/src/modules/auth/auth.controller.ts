@@ -28,7 +28,23 @@ export async function registerController(
       });
     }
 
-    console.error("Registration failed.");
+    if (typeof error === "object" && error !== null) {
+      const dbError = error as {
+        code?: string;
+        message?: string;
+        constraint?: string;
+        table?: string;
+      };
+
+      console.error("Registration failed:", {
+        code: dbError.code ?? "APPLICATION_ERROR",
+        message: dbError.message ?? "Unknown error",
+        constraint: dbError.constraint,
+        table: dbError.table,
+      });
+    } else {
+      console.error("Registration failed: Unknown error type.");
+    }
     return res.status(500).json( {
       error: "Registration could not be completed.",
     });
