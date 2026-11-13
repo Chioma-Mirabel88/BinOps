@@ -56,7 +56,14 @@ app.get("/api/health/ready", async (_req, res) => {
       status: "ready",
       database: "connected",
     });
-  } catch {
+  } catch (error) {
+    const dbError = error as { code?: string; message?: string };
+
+    console.error("Database readiness check failed:", {
+      code: dbError.code ?? "UNKNOWN",
+      message: dbError.message ?? "Unknown database error",
+    });
+
     return res.status(503).json({
       status: "not_ready",
       database: "unavailable",
