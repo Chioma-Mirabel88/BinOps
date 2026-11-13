@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import {
   getUserProfile,
   getActivePspOrganisations,
+  getActiveRecyclerOrganisations,
 } from "./users.service.js";
 
 export async function getMyProfileController(
@@ -53,6 +54,27 @@ export async function getActivePspOrganisationsController(
 
     return res.status(500).json({
       error: "Unable to retrieve PSP organisations.",
+    });
+  }
+}
+
+
+export async function getActiveRecyclerOrganisationsController(
+  _req: Request,
+  res: Response,
+) {
+  try {
+    const organisations = await getActiveRecyclerOrganisations();
+
+    return res.status(200).json({
+      count: organisations.length,
+      organisations,
+    });
+  } catch {
+    console.error("Recycler organisation directory retrieval failed.");
+
+    return res.status(500).json({
+      error: "Unable to retrieve recycler organisations.",
     });
   }
 }

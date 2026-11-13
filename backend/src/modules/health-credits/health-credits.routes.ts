@@ -28,8 +28,6 @@ customerHealthCreditsRouter.get(
   "/balance",
   authenticateToken,
   getHealthCreditBalanceController,
-  redeemHealthCreditsController,
-  getHealthCreditManagementController,
 );
 
 export const healthcarePartnerHealthCreditsRouter = Router();
@@ -44,5 +42,4 @@ healthcarePartnerHealthCreditsRouter.post(
   "/redemptions",
   authenticateToken,
   redeemHealthCreditsController,
-  getHealthCreditManagementController,
 );

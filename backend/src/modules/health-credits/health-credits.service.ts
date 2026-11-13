@@ -352,6 +352,13 @@ export async function issueHealthCredits(
 }
 
 export async function getHealthCreditBalance(userId: string) {
+  await pool.query(
+    `INSERT INTO health_credit_accounts (owner_user_id)
+     VALUES ($1)
+     ON CONFLICT (owner_user_id) DO NOTHING`,
+    [userId],
+  );
+
   const result = await pool.query<{
     accountId: string;
     status: string;

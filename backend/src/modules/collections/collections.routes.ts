@@ -70,7 +70,6 @@ pspCollectionsRouter.get(
   authenticateToken,
   requirePspAccess,
   getPspAvailableCollectionRequestsController,
-  getPspHandoverFacilitiesController,
 );
 
 pspCollectionsRouter.post(

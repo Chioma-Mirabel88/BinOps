@@ -68,8 +68,10 @@ export async function getActivePspOrganisations() {
     id: string;
     name: string;
     service_area: string | null;
+    contact_phone: string | null;
+    contact_email: string | null;
   }>(
-    `SELECT id, name, service_area
+    `SELECT id, name, service_area, contact_phone, contact_email
      FROM organisations
      WHERE organisation_type = 'psp_operator'
        AND is_active = TRUE
@@ -80,5 +82,44 @@ export async function getActivePspOrganisations() {
     id: row.id,
     name: row.name,
     serviceArea: row.service_area,
+    contactPhone: row.contact_phone,
+    contactEmail: row.contact_email,
+  }));
+}
+
+export async function getActiveRecyclerOrganisations() {
+  const result = await pool.query<{
+    id: string;
+    name: string;
+    service_area: string | null;
+    contact_phone: string | null;
+    contact_email: string | null;
+    facility_code: string;
+    facility_address: string;
+  }>(
+    `SELECT
+       o.id,
+       o.name,
+       o.service_area,
+       o.contact_phone,
+       o.contact_email,
+       cf.facility_code,
+       cf.facility_address
+     FROM organisations o
+     JOIN collection_facilities cf ON cf.organisation_id = o.id
+     WHERE o.organisation_type = 'recycling_facility'
+       AND o.is_active = TRUE
+       AND cf.is_approved = TRUE
+     ORDER BY o.name ASC`,
+  );
+
+  return result.rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    serviceArea: row.service_area,
+    contactPhone: row.contact_phone,
+    contactEmail: row.contact_email,
+    facilityCode: row.facility_code,
+    facilityAddress: row.facility_address,
   }));
 }

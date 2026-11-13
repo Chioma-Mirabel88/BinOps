@@ -182,10 +182,17 @@ function App() {
             <Settings size={19} /><span>Settings</span>
           </button>
           <div className="profile">
-            <div className="avatar">{initials}</div>
-            <div className="profile-info"><strong>{user.firstName} {user.lastName}</strong><span>{user.organisations[0]?.type || 'Customer account'}</span></div>
-            <ChevronDown size={16} />
-            <button className="nav-item" onClick={handleLogout}>Sign out</button>
+            <div className="profile-identity">
+              <div className="avatar">{initials}</div>
+              <div className="profile-info">
+                <strong>{user.firstName} {user.lastName}</strong>
+                <span>{user.organisations[0]?.type || 'Customer account'}</span>
+              </div>
+              <ChevronDown size={16} />
+            </div>
+            <button className="nav-item profile-signout" onClick={handleLogout}>
+              Sign out
+            </button>
           </div>
         </div>
       </aside>

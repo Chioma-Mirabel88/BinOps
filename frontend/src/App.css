@@ -1568,3 +1568,25 @@ td svg { vertical-align: middle; color: #9ba99f; }
   .app-shell .healthcare-directory-heading { align-items: flex-start; }
   .app-shell .healthcare-directory-controls { grid-template-columns: 1fr; }
 }
+
+
+/* Customer profile and sign-out layout */
+.profile {
+  display: block;
+}
+
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profile-info {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-signout {
+  margin-top: 12px;
+}

@@ -35,6 +35,24 @@ type HealthcareDirectoryPartner = {
   contactPhone: string | null;
 };
 
+type PspDirectoryOrganisation = {
+  id: string;
+  name: string;
+  serviceArea: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+};
+
+type RecyclerDirectoryOrganisation = {
+  id: string;
+  name: string;
+  serviceArea: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+  facilityCode: string;
+  facilityAddress: string;
+};
+
 type Props = { page: string; onNavigate: (page: string) => void };
 
 export default function CustomerWorkspace({ page, onNavigate }: Props) {
@@ -48,6 +66,10 @@ export default function CustomerWorkspace({ page, onNavigate }: Props) {
   const [directoryError, setDirectoryError] = useState("");
   const [directorySearch, setDirectorySearch] = useState("");
   const [directoryType, setDirectoryType] = useState<"all" | "hospital" | "pharmacy">("all");
+  const [pspOrganisations, setPspOrganisations] = useState<PspDirectoryOrganisation[]>([]);
+  const [recyclerOrganisations, setRecyclerOrganisations] = useState<RecyclerDirectoryOrganisation[]>([]);
+  const [operatorDirectoryLoading, setOperatorDirectoryLoading] = useState(false);
+  const [operatorDirectoryError, setOperatorDirectoryError] = useState("");
 
   const customerName = useMemo(() => {
     const business = user?.organisations?.find(
@@ -94,9 +116,40 @@ export default function CustomerWorkspace({ page, onNavigate }: Props) {
     }
   };
 
+  const loadOperatorDirectories = async () => {
+    setOperatorDirectoryLoading(true);
+    setOperatorDirectoryError("");
+
+    const results = await Promise.allSettled([
+      api.get("/users/psp-organisations"),
+      api.get("/users/recycler-organisations"),
+    ]);
+
+    if (results[0].status === "fulfilled") {
+      setPspOrganisations(results[0].value.data.organisations || []);
+    } else {
+      setOperatorDirectoryError("PSP organisations could not be loaded.");
+    }
+
+    if (results[1].status === "fulfilled") {
+      setRecyclerOrganisations(results[1].value.data.organisations || []);
+    } else {
+      setOperatorDirectoryError(previous =>
+        previous
+          ? previous + " Recycler facilities could not be loaded."
+          : "Recycler facilities could not be loaded."
+      );
+    }
+
+    setOperatorDirectoryLoading(false);
+  };
+
   useEffect(() => {
     if (page === "Healthcare Partners") {
       void loadHealthcareDirectory();
+    }
+    if (page === "My PSP" || page === "Recyclers") {
+      void loadOperatorDirectories();
     }
   }, [page]);
 
@@ -203,11 +256,56 @@ export default function CustomerWorkspace({ page, onNavigate }: Props) {
       )}
 
       {page === "My PSP" && (
-        <section className="customer-directory-card">
-          <Truck size={26} />
-          <h2>Your collection operator</h2>
-          {pspNames.length ? pspNames.map(name => <p key={name}>{name}</p>) : <p>No PSP assignment is available in your current collection records.</p>}
-          <small>Operator information is shown from your existing collection records.</small>
+        <section className="healthcare-directory">
+          <div className="healthcare-directory-heading">
+            <div>
+              <Truck size={27} />
+              <h2>Service providers</h2>
+              <p>Find active PSP organisations and their available contact details.</p>
+            </div>
+            <button onClick={() => void loadOperatorDirectories()} disabled={operatorDirectoryLoading}>
+              <RefreshCw size={16} /> Refresh
+            </button>
+          </div>
+
+          <div className="healthcare-directory-notice">
+            Your assigned PSP, where available, is shown in your collection records. Contact a provider directly to confirm service coverage and availability.
+          </div>
+
+          {pspNames.length > 0 && (
+            <div className="healthcare-directory-notice">
+              <strong>Your recorded collection providers:</strong> {pspNames.join(", ")}
+            </div>
+          )}
+
+          {operatorDirectoryError && (
+            <div className="customer-error"><AlertCircle size={16} />{operatorDirectoryError}</div>
+          )}
+
+          {operatorDirectoryLoading ? (
+            <p className="customer-empty">Loading service providers...</p>
+          ) : pspOrganisations.length === 0 ? (
+            <p className="customer-empty">No active PSP organisations are currently listed.</p>
+          ) : (
+            <div className="healthcare-directory-grid">
+              {pspOrganisations.map(provider => (
+                <article className="healthcare-directory-item" key={provider.id}>
+                  <div className="healthcare-directory-item-icon"><Truck size={21} /></div>
+                  <div className="healthcare-directory-item-content">
+                    <span className="healthcare-directory-type">PSP operator</span>
+                    <h3>{provider.name}</h3>
+                    <p><MapPin size={14} /> {provider.serviceArea || "Service area not provided"}</p>
+                    {provider.contactPhone
+                      ? <p><strong>Phone:</strong> <a href={"tel:" + provider.contactPhone}>{provider.contactPhone}</a></p>
+                      : <p>Contact number not provided</p>}
+                    {provider.contactEmail
+                      ? <p><strong>Email:</strong> <a href={"mailto:" + provider.contactEmail}>{provider.contactEmail}</a></p>
+                      : null}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -283,11 +381,52 @@ export default function CustomerWorkspace({ page, onNavigate }: Props) {
       )}
 
       {page === "Recyclers" && (
-        <section className="customer-directory-card">
-          <Recycle size={27} />
-          <h2>Recycling facilities</h2>
-          <p>Recycling facilities receive and process eligible materials after collection handover.</p>
-          <small>The recycler directory is not yet connected to a backend listing. Facility listings will appear when that service is available.</small>
+        <section className="healthcare-directory">
+          <div className="healthcare-directory-heading">
+            <div>
+              <Recycle size={27} />
+              <h2>Approved recycling facilities</h2>
+              <p>Browse active recycling organisations with approved BinOps receiving facilities.</p>
+            </div>
+            <button onClick={() => void loadOperatorDirectories()} disabled={operatorDirectoryLoading}>
+              <RefreshCw size={16} /> Refresh
+            </button>
+          </div>
+
+          <div className="healthcare-directory-notice">
+            Facility listings are based on approved facility records. Contact the recycler to confirm accepted waste categories and receiving arrangements before visiting.
+          </div>
+
+          {operatorDirectoryError && (
+            <div className="customer-error"><AlertCircle size={16} />{operatorDirectoryError}</div>
+          )}
+
+          {operatorDirectoryLoading ? (
+            <p className="customer-empty">Loading recycling facilities...</p>
+          ) : recyclerOrganisations.length === 0 ? (
+            <p className="customer-empty">No active recyclers with approved facilities are currently listed.</p>
+          ) : (
+            <div className="healthcare-directory-grid">
+              {recyclerOrganisations.map(facility => (
+                <article className="healthcare-directory-item" key={facility.id}>
+                  <div className="healthcare-directory-item-icon"><Recycle size={21} /></div>
+                  <div className="healthcare-directory-item-content">
+                    <span className="healthcare-directory-type">Approved facility</span>
+                    <h3>{facility.name}</h3>
+                    <p><MapPin size={14} /> {facility.facilityAddress}</p>
+                    <p><strong>Facility code:</strong> {facility.facilityCode}</p>
+                    <p><strong>Service area:</strong> {facility.serviceArea || "Not provided"}</p>
+                    {facility.contactPhone
+                      ? <p><strong>Phone:</strong> <a href={"tel:" + facility.contactPhone}>{facility.contactPhone}</a></p>
+                      : <p>Contact number not provided</p>}
+                    {facility.contactEmail
+                      ? <p><strong>Email:</strong> <a href={"mailto:" + facility.contactEmail}>{facility.contactEmail}</a></p>
+                      : null}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       )}
 

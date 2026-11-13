@@ -67,6 +67,13 @@ export async function registerUser(
     }
 
     if (input.accountType === "individual") {
+      await client.query(
+        `INSERT INTO health_credit_accounts (owner_user_id)
+         VALUES ($1)
+         ON CONFLICT (owner_user_id) DO NOTHING`,
+        [user.id],
+      );
+
       await client.query("COMMIT");
 
       return {
