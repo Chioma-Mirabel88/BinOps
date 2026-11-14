@@ -13,7 +13,7 @@ import {
   LayoutDashboard, Truck, Users, Recycle, Coins, ShieldCheck,
   Building2, Settings, Bell, Search, ArrowUpRight,
   Menu, Leaf, MapPin, Clock3, CheckCircle2, AlertCircle,
-  Activity, ChevronDown
+  Activity, ChevronDown, LogOut
 } from 'lucide-react'
 import './App.css'
 import oversightHeroImage from './assets/binops-oversight-hero.png'
@@ -67,6 +67,7 @@ function App() {
   const { user, loading, logout } = useAuth()
   const [active, setActive] = useState('Overview')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [authMode, setAuthMode] = useState<"login" | "register" | "">("")
   const [showWorkspace, setShowWorkspace] = useState(false)
 
@@ -78,6 +79,7 @@ function App() {
   }, [user])
 
   const handleLogout = () => {
+    setProfileMenuOpen(false)
     setShowWorkspace(false)
     setAuthMode("")
     logout()
@@ -205,7 +207,41 @@ function App() {
             <div className="environment"><span></span> Demo environment</div>
             <button className="icon-button" aria-label="Search"><Search size={19} /></button>
             <button className="icon-button notification" aria-label="Notifications"><Bell size={19} /><i /></button>
-            <div className="top-avatar">{initials}</div>
+            <div className="profile-menu-wrap">
+              <button
+                type="button"
+                className="top-avatar"
+                aria-label="Open account menu"
+                aria-haspopup="menu"
+                aria-expanded={profileMenuOpen}
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              >
+                {initials}
+                <ChevronDown size={13} />
+              </button>
+
+              {profileMenuOpen && (
+                <div className="profile-dropdown" role="menu">
+                  <div className="profile-dropdown-info">
+                    <strong>{user.firstName} {user.lastName}</strong>
+                    <span>{user.organisations[0]?.name || 'BinOps account'}</span>
+                    <small>{user.email}</small>
+                  </div>
+
+                  <div className="profile-dropdown-divider" />
+
+                  <button
+                    type="button"
+                    className="profile-dropdown-signout"
+                    role="menuitem"
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={17} />
+                    <span>Sign out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
